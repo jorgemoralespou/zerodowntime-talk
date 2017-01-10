@@ -78,7 +78,7 @@ items:
       spec:
         containers:
         - image: probesdemo
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
             httpGet:
