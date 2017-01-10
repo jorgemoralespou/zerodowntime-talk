@@ -1,3 +1,2 @@
-mod_wsgi
 Flask
 flask-restful
