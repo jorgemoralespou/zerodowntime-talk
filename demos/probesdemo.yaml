@@ -119,7 +119,6 @@ items:
         from:
           kind: ImageStreamTag
           name: probesdemo:latest
-          namespace: checksdemo
       type: ImageChange
 - apiVersion: v1
   kind: Service
