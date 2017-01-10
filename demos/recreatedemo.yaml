@@ -1,0 +1,93 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    name: deployment-example
+  spec:
+    dockerImageRepository: openshift/deployment-example
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: deployment-example
+    name: deployment-example
+  spec:
+    replicas: 3
+    selector:
+      app: deployment-example
+      deploymentconfig: deployment-example
+    strategy:
+      activeDeadlineSeconds: 21600
+      recreateParams:
+        timeoutSeconds: 600
+      resources: {}
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          app: deployment-example
+          deploymentconfig: deployment-example
+      spec:
+        containers:
+        - image: deployment-example
+          imagePullPolicy: Always
+          name: deployment-example
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - deployment-example
+        from:
+          kind: ImageStreamTag
+          name: deployment-example:latest
+      type: ImageChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: deployment-example
+    name: deployment-example
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: deployment-example
+      deploymentconfig: deployment-example
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: Route
+  metadata:
+    labels:
+      app: deployment-example
+    name: deployment-example
+  spec:
+    host:
+    port:
+      targetPort: 8080-tcp
+    to:
+      kind: Service
+      name: deployment-example
+      weight: 100
+    wildcardPolicy: None
+kind: List
+metadata: {}
