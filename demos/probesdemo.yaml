@@ -1,0 +1,155 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+      app: probesdemo
+    name: probesdemo
+  spec:
+    tags:
+    - name: latest
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: probesdemo
+    name: probesdemo
+  spec:
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: probesdemo:latest
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      contextDir: probes-logger-python
+      git:
+        uri: https://github.com/jorgemoralespou/zerodowntime-talk
+      type: Git
+    strategy:
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: python:3.5
+          namespace: openshift
+      type: Source
+    triggers:
+    - github:
+        secret: aAaKyakl4F_Edm4ZyaZv
+      type: GitHub
+    - generic:
+        secret: 6ddVC3Lzp-P8Enlvlgv1
+      type: Generic
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: probesdemo
+    name: probesdemo
+  spec:
+    replicas: 1
+    selector:
+      app: probesdemo
+      deploymentconfig: probesdemo
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          app: probesdemo
+          deploymentconfig: probesdemo
+      spec:
+        containers:
+        - image: probesdemo
+          imagePullPolicy: Always
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /ws/live
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: probesdemo
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /ws/ready
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 2
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - probesdemo
+        from:
+          kind: ImageStreamTag
+          name: probesdemo:latest
+          namespace: checksdemo
+      type: ImageChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: probesdemo
+    name: probesdemo
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: probesdemo
+      deploymentconfig: probesdemo
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: Route
+  metadata:
+    name: probesdemo
+  spec:
+    host:
+    port:
+      targetPort: 8080-tcp
+    to:
+      kind: Service
+      name: probesdemo
+      weight: 100
+    wildcardPolicy: None
+kind: List
+metadata: {}
