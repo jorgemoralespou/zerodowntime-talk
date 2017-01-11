@@ -5,6 +5,7 @@ import os
 import socket
 
 INSTANCE = os.environ.get('HOSTNAME', socket.gethostname())
+DELAY = float(os.environ.get('SHUTDOWN_DELAY', 10.0))
 
 from flask import Flask
 
@@ -69,7 +70,8 @@ def killer():
     print('sleep', delay)
     time.sleep(delay)
     print('killing')
-    os.kill(os.getpid(), signal.SIGKILL)
+#    os.kill(os.getpid(), signal.SIGKILL)
+    os._exit(os.EX_OK)
 
 def handler(signum, frame):
     global LIVERET, READYRET
@@ -77,7 +79,7 @@ def handler(signum, frame):
     print('signal', signum)
     READYRET=('NOK', 500)
     LIVERET=('NOK', 500)
-    wakeup.put(10.0)
+    wakeup.put(DELAY)
 
 if __name__ == '__main__':
     signal.signal(signal.SIGTERM, handler)

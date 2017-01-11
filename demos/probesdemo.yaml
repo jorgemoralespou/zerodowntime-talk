@@ -97,7 +97,7 @@ items:
             - name: PYTHONUNBUFFERED
               value: '1'
             - name: SHUTDOWN_DELAY
-              value: '10'
+              value: '15'
           readinessProbe:
             failureThreshold: 2
             httpGet:
