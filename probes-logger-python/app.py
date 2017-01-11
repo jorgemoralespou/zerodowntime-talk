@@ -25,13 +25,13 @@ def live():
 @application.route('/ws/setready')
 def setready():
     global READYRET
-    READYRET=('NOK', 500)
+    READYRET=('OK', 200)
     return 'OK'
 
 @application.route('/ws/setlive')
 def setlive():
     global LIVERET
-    LIVERET=('NOK', 500)
+    LIVERET=('OK', 200)
     return 'OK'
 
 @application.route('/ws/unsetready')
