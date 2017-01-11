@@ -96,6 +96,8 @@ items:
           env:
             - name: PYTHONUNBUFFERED
               value: '1'
+            - name: SHUTDOWN_DELAY
+              value: '10'
           readinessProbe:
             failureThreshold: 2
             httpGet:

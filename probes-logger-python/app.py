@@ -4,7 +4,7 @@ from __future__ import print_function
 import os
 import socket
 
-INSTANCE = os.environ.get('INSTANCE', socket.gethostname())
+INSTANCE = os.environ.get('HOSTNAME', socket.gethostname())
 
 from flask import Flask
 
